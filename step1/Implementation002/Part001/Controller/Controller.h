@@ -54,6 +54,7 @@ private:
     std::string getTime(const std::string& question, std::optional<std::string> error = std::nullopt);
     std::string getDate(const std::string& question, std::optional<std::string> error = std::nullopt);
     std::string getInput(const std::string & question, std::function<bool(std::string)> && validation, std::optional<std::string> error = std::nullopt);
+    void executeCommand(std::function<void(Job &)> && command);
 public:
     // TODO : Create a destructor or use smart pointer
     void Build();

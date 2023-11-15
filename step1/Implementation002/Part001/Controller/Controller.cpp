@@ -37,6 +37,20 @@ std::string Controller::getInput(const std::string &question, std::function<bool
     return input;
 }
 
+void Controller::executeCommand(std::function<void(Job &)> &&command)
+{
+    if (
+        auto it = jobs_container.find(current->key());
+        it != std::end(jobs_container))
+    {
+        command(*it->second);
+    }
+    else
+    {
+        std::cout << "Something went wrong, no action performed" << std::endl;
+    }
+}
+
 void Controller::initializeCallbacks()
 {
     clockIn_Callback = [&]
@@ -44,93 +58,53 @@ void Controller::initializeCallbacks()
         std::cout << "|| Clock In ||" << std::endl;
         std::string start_time = getTime("Start Time (hh:mm) : ");
         std::string start_date = getDate("Start Date (yyyy-mm-dd) : ");
-
-        // TODO : Figure out how to refactor this bit
-        if (
-            auto it = jobs_container.find(current->key());
-            it != std::end(jobs_container))
-        {
-            it->second->ClockIn(start_time, start_date);
-            std::cout << "ClockIn : " << start_time << " | " << start_date << " - succeed" << std::endl;
-        }
-        else
-        {
-            std::cout << "Something went wrong, no action performed" << std::endl;
-        }
+        executeCommand([&](Job &job)
+                       {
+            job.ClockIn(start_time, start_date);
+            std::cout << "ClockIn : " << start_time << " | " << start_date << " - succeed" << std::endl; });
     };
     clockOut_Callback = [&]
     {
         std::cout << "|| Clock Out ||" << std::endl;
         std::string end_time = getTime("End Time (hh:mm): ");
         std::string end_date = getDate("End Date (yyyy-mm-dd) : ");
-
-        if (
-            auto it = jobs_container.find(current->key());
-            it != std::end(jobs_container))
-        {
-            it->second->ClockOut(end_time, end_date);
-            std::cout << "ClockOut : " << end_time << " | " << end_date << " - succeed" << std::endl;
-        }
-        else
-        {
-            std::cout << "Something went wrong, no action performed" << std::endl;
-        }
+        executeCommand([&](Job &job)
+                       {
+            job.ClockOut(end_time, end_date);
+            std::cout << "ClockOut : " << end_time << " | " << end_date << " - succeed" << std::endl; });
     };
     sickDay_Callback = [&]
     {
         std::cout << "|| Sick Day ||" << std::endl;
         std::string date = getDate("Date (yyyy-mm-dd) : ");
-
-        if (
-            auto it = jobs_container.find(current->key());
-            it != std::end(jobs_container))
-        {
-            it->second->CallSickDay(date);
-            std::cout << "Sick Day : " << date << " - succeed" << std::endl;
-        }
-        else
-        {
-            std::cout << "Something went wrong, no action performed" << std::endl;
-        }
+        executeCommand([&](Job &job)
+                       {
+            job.CallSickDay(date);
+            std::cout << "Sick Day : " << date << " - succeed" << std::endl; });
     };
     vacation_Callback = [&]
     {
         std::cout << "|| Vacations ||" << std::endl;
         std::string start_date = getDate("Start Date (yyyy-mm-dd) : ");
         std::string end_date = getDate("End Date (yyyy-mm-dd) : ");
-
-        if (
-            auto it = jobs_container.find(current->key());
-            it != std::end(jobs_container))
-        {
-            it->second->ScheduleVacation(start_date, end_date);
-            std::cout << "Vacations : " << start_date << " | " << end_date << " - succeed" << std::endl;
-        }
-        else
-        {
-            std::cout << "Something went wrong, no action performed" << std::endl;
-        }
+        executeCommand([&](Job &job)
+                       {
+            job.ScheduleVacation(start_date, end_date);
+            std::cout << "Vacations : " << start_date << " | " << end_date << " - succeed" << std::endl; });
     };
     report_Callback = [&]
     {
-        if (
-            auto it = jobs_container.find(current->key());
-            it != std::end(jobs_container))
-        {
+        executeCommand([&](Job &job)
+                       {
             std::cout << "Calling Report on empty" << std::endl;
             try
             {
-                std::cout << it->second->Report() << std::endl;
+                std::cout << job.Report() << std::endl;
             }
             catch (const std::out_of_range &e)
             {
                 std::cout << "No registers found!" << std::endl;
-            }
-        }
-        else
-        {
-            std::cout << "Something went wrong, no action performed" << std::endl;
-        }
+            } });
     };
     add_developer_Callback = [&]
     {
