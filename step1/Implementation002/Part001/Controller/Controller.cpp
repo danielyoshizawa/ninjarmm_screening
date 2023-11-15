@@ -8,28 +8,17 @@
 
 #include <iostream>
 
-// TODO : Refactor to merge this functions
-//        maybe pass the function as argument, or smth 
 std::string Controller::getTime(const std::string &question, std::optional<std::string> error)
 {
-    std::string input{};
-    bool c = true;
-    do
-    {
-        std::cout << question << std::endl;
-        std::cin >> input;
-        // TODO : Refactor - How can I do better?
-        c = !(validator.is_time(input));
-        if (c)
-        {
-            std::cout << error.value_or("Invalid input, please enter again") << std::endl;
-        }
-    } while (c);
-
-    return input;
+    return getInput(question, std::bind(&Validator::is_time, &validator, std::placeholders::_1), error);
 };
 
-std::string Controller::getDate(const std::string& question, std::optional<std::string> error)
+std::string Controller::getDate(const std::string &question, std::optional<std::string> error)
+{
+    return getInput(question, std::bind(&Validator::is_date, &validator, std::placeholders::_1), error);
+}
+
+std::string Controller::getInput(const std::string &question, std::function<bool(std::string)> &&validation, std::optional<std::string> error)
 {
     std::string input{};
     bool c = true;
@@ -37,8 +26,8 @@ std::string Controller::getDate(const std::string& question, std::optional<std::
     {
         std::cout << question << std::endl;
         std::cin >> input;
-        // TODO : Refactor - How can I do better?
-        c = !(validator.is_date(input));
+
+        c = !(validation(input));
         if (c)
         {
             std::cout << error.value_or("Invalid input, please enter again") << std::endl;
@@ -52,7 +41,6 @@ void Controller::initializeCallbacks()
 {
     clockIn_Callback = [&]
     {
-        // TODO : Remove title, this will be the caller responsibility
         std::cout << "|| Clock In ||" << std::endl;
         std::string start_time = getTime("Start Time (hh:mm) : ");
         std::string start_date = getDate("Start Date (yyyy-mm-dd) : ");
@@ -92,7 +80,7 @@ void Controller::initializeCallbacks()
     {
         std::cout << "|| Sick Day ||" << std::endl;
         std::string date = getDate("Date (yyyy-mm-dd) : ");
-        
+
         if (
             auto it = jobs_container.find(current->key());
             it != std::end(jobs_container))
@@ -158,6 +146,7 @@ void Controller::initializeCallbacks()
         std::string id{};
         std::cout << "Please enter the worker id" << std::endl;
         std::cin >> id;
+
         jobs_container.insert(std::pair(id, new Pilot(id)));
         addJobMenu(id);
     };
