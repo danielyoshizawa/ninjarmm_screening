@@ -8,24 +8,54 @@
 
 #include <iostream>
 
+// TODO : Refactor to merge this functions
+//        maybe pass the function as argument, or smth 
+std::string Controller::getTime(const std::string &question, std::optional<std::string> error)
+{
+    std::string input{};
+    bool c = true;
+    do
+    {
+        std::cout << question << std::endl;
+        std::cin >> input;
+        // TODO : Refactor - How can I do better?
+        c = !(validator.is_time(input));
+        if (c)
+        {
+            std::cout << error.value_or("Invalid input, please enter again") << std::endl;
+        }
+    } while (c);
+
+    return input;
+};
+
+std::string Controller::getDate(const std::string& question, std::optional<std::string> error)
+{
+    std::string input{};
+    bool c = true;
+    do
+    {
+        std::cout << question << std::endl;
+        std::cin >> input;
+        // TODO : Refactor - How can I do better?
+        c = !(validator.is_date(input));
+        if (c)
+        {
+            std::cout << error.value_or("Invalid input, please enter again") << std::endl;
+        }
+    } while (c);
+
+    return input;
+}
+
 void Controller::initializeCallbacks()
 {
     clockIn_Callback = [&]
     {
-        std::string start_time{};
-        std::string start_date{};
-        bool c = true;
-        do {
-            std::cout << "|| Clock In ||" << std::endl;
-            std::cout << "Start Time (hh:mm) : " << std::endl;
-            std::cin >> start_time;
-            std::cout << "Start Date : " << std::endl;
-            std::cin >> start_date;
-            c = !(validator.is_time(start_time) && validator.is_date(start_date));
-            if (c) {
-                std::cout << "Invalid input, please enter again" << std::endl;
-            }
-        } while(c);
+        // TODO : Remove title, this will be the caller responsibility
+        std::cout << "|| Clock In ||" << std::endl;
+        std::string start_time = getTime("Start Time (hh:mm) : ");
+        std::string start_date = getDate("Start Date (yyyy-mm-dd) : ");
 
         // TODO : Figure out how to refactor this bit
         if (
@@ -42,20 +72,10 @@ void Controller::initializeCallbacks()
     };
     clockOut_Callback = [&]
     {
-        std::string end_time{};
-        std::string end_date{};
-        bool c = true;
-        do {
-            std::cout << "|| Clock Out ||" << std::endl;
-            std::cout << "End Time (hh:mm): " << std::endl;
-            std::cin >> end_time;
-            std::cout << "End Date (yyyy-mm-dd) : " << std::endl;
-            std::cin >> end_date;
-            c = !(validator.is_time(end_time) && validator.is_date(end_date));
-            if (c) {
-                std::cout << "Invalid input, please enter again" << std::endl;
-            }
-        } while(c);
+        std::cout << "|| Clock Out ||" << std::endl;
+        std::string end_time = getTime("End Time (hh:mm): ");
+        std::string end_date = getDate("End Date (yyyy-mm-dd) : ");
+
         if (
             auto it = jobs_container.find(current->key());
             it != std::end(jobs_container))
@@ -70,17 +90,9 @@ void Controller::initializeCallbacks()
     };
     sickDay_Callback = [&]
     {
-        std::string date{};
-        bool c = true;
-        do {
-            std::cout << "|| Sick Day ||" << std::endl;
-            std::cout << "Date (yyyy-mm-dd) : " << std::endl;
-            std::cin >> date;
-            c = !(validator.is_date(date));
-            if (c) {
-                std::cout << "Invalid input, please enter again" << std::endl;
-            }
-        } while(c);
+        std::cout << "|| Sick Day ||" << std::endl;
+        std::string date = getDate("Date (yyyy-mm-dd) : ");
+        
         if (
             auto it = jobs_container.find(current->key());
             it != std::end(jobs_container))
@@ -95,20 +107,10 @@ void Controller::initializeCallbacks()
     };
     vacation_Callback = [&]
     {
-        std::string start_date{};
-        std::string end_date{};
-        bool c = true;
-        do {
-            std::cout << "|| Vacations ||" << std::endl;
-            std::cout << "Start Date (yyyy-mm-dd) : " << std::endl;
-            std::cin >> start_date;
-            std::cout << "End Date (yyyy-mm-dd) : " << std::endl;
-            std::cin >> end_date;
-            c = !(validator.is_date(start_date) && validator.is_date(end_date));
-            if (c) {
-                std::cout << "Invalid input, please enter again" << std::endl;
-            }
-        } while(c);
+        std::cout << "|| Vacations ||" << std::endl;
+        std::string start_date = getDate("Start Date (yyyy-mm-dd) : ");
+        std::string end_date = getDate("End Date (yyyy-mm-dd) : ");
+
         if (
             auto it = jobs_container.find(current->key());
             it != std::end(jobs_container))
@@ -128,9 +130,11 @@ void Controller::initializeCallbacks()
             it != std::end(jobs_container))
         {
             std::cout << "Calling Report on empty" << std::endl;
-            try {
+            try
+            {
                 std::cout << it->second->Report() << std::endl;
-            } catch (const std::out_of_range & e)
+            }
+            catch (const std::out_of_range &e)
             {
                 std::cout << "No registers found!" << std::endl;
             }
@@ -179,7 +183,7 @@ void Controller::initializeItems()
     sickDay = new Item(sickDay_Callback, "SickDay", "sd");
     vacations = new Item(vacation_Callback, "Vacations", "vc");
     report = new Item(report_Callback, "Report", "rp");
-    previous = new Item([]{}, "Return", "r");
+    previous = new Item([] {}, "Return", "r");
     add_developer = new Item(add_developer_Callback, "Developer", "dv");
     add_pilot = new Item(add_pilot_Callback, "Pilot", "pt");
 }

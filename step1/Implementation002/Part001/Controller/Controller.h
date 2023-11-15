@@ -6,6 +6,8 @@
 #include <map>
 #include <string>
 #include <Validator.h>
+#include <optional>
+
 // General purpose controller
 // Our application is very simple so there is no need to multiple controllers here
 // TODO : Implement the rule of 3 here, OR, delete all
@@ -49,6 +51,8 @@ private:
     void initializeMenus();
     void buildView();
     void addJobMenu(const std::string & id);
+    std::string getTime(const std::string& question, std::optional<std::string> error = std::nullopt);
+    std::string getDate(const std::string& question, std::optional<std::string> error = std::nullopt);
 public:
     // TODO : Create a destructor or use smart pointer
     void Build();
