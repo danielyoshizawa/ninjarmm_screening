@@ -37,6 +37,5 @@ TEST_CASE("Time Arithmetic library", "[Time]")
         REQUIRE_THAT(time.toString(), Catch::Matchers::Equals("10:22"));
         REQUIRE_THAT(ss.str(), Catch::Matchers::Equals("10:22"));
         REQUIRE_THAT(ss.str(), !Catch::Matchers::Equals("10:23"));
-
     }
 }
