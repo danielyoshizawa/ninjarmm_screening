@@ -22,12 +22,14 @@ public:
 
 public:
     // TODO : Maybe return a std::variant or a response {status, msg} or smth
+    //        Since we don't have many possible outputs for the methods
+    //        I'll change the return to bool, or it does work or not
     // C++20 : Job(const std::string & id, auto & clock)
     Job(const std::string &id, Clock_t &clock) : _id(id), clock(clock){};
     virtual std::string ClockIn(std::string date, std::string time) = 0;
     virtual std::string ClockOut(std::string date, std::string time) = 0;
     virtual std::string ScheduleVacation(std::string begin, std::string end) = 0;
-    virtual std::string CallSickDay(std::string date) = 0;
+    virtual bool CallSickDay(std::string date) = 0;
     virtual std::string Report() const = 0;
     virtual const std::string Id() const noexcept = 0;
 };

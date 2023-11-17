@@ -1,6 +1,14 @@
 #include <Developer.h>
 #include <Clock.h>
 #include <sstream>
+#define MAX_SICK_DAYS 9
+
+// Developer Model Rules:
+// - They need to work 8h per day (How to reinforce it?)
+// - Can have 9 sick days per year (This is easy, can check for all the entries or keep an internal state) - DONE
+// - 30 days vacations (Same as the previous one)
+// - Work only on weekdays (I'm not keeping a calendar, maybe I'll need to ignore this one)
+// - Report should have a resume of activity -DONE
 
 // TODO : Does const & makes sense here?
 //        should I go for R-Value, since I don't want the id to be outside this
@@ -38,10 +46,37 @@ std::string Developer::ScheduleVacation(std::string begin, std::string end)
     return "Vactions Scheduled";
 }
 
-std::string Developer::CallSickDay(std::string date)
+bool Developer::CallSickDay(std::string date)
 {
+    bool exceed_days{false};
+    try
+    {
+        int count_sick_days{0};
+        std::string input_year = date.substr(0, 4);
+        clock.Historic(_id).accept([&](auto &operations)
+                                   {
+            for (auto op : operations)
+            {
+                if (input_year.compare(std::get<1>(op.get()).substr(0, 4)) == 0)
+                {
+                    ++count_sick_days;
+                }
+            }
+        exceed_days = count_sick_days >= MAX_SICK_DAYS; });
+    }
+    catch (const std::out_of_range &e)
+    {
+        // We can ignore the exception,
+        // meaning that are no sick days registered for the id
+    }
+
+    if (exceed_days)
+    {
+        return false;
+    }
+
     clock.Register(_id, "", date, "", date, "sickDay");
-    return "Calling Sick";
+    return true;
 }
 
 std::string Developer::Report() const

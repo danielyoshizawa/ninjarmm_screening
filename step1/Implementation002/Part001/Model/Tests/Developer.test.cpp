@@ -49,8 +49,7 @@ TEST_CASE( "Developer Test Suit", "[Job][Developer]" ) {
     }
 
     SECTION("Calling Sick") {
-        auto response = developer->CallSickDay("2023-11-07");
-        REQUIRE(response == "Calling Sick");
+        REQUIRE(developer->CallSickDay("2023-11-07"));
     }
 
     SECTION("Report Status") {

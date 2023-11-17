@@ -17,9 +17,9 @@ std::string Pilot::ScheduleVacation(std::string begin, std::string end)
     return "";
 }
 
-std::string Pilot::CallSickDay(std::string date)
+bool Pilot::CallSickDay(std::string date)
 {
-    return "";
+    return true;
 }
 
 std::string Pilot::Report() const
