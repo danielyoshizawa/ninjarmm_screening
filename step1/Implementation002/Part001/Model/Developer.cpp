@@ -5,9 +5,8 @@
 // TODO : Does const & makes sense here?
 //        should I go for R-Value, since I don't want the id to be outside this
 //        object?
-Developer::Developer(const std::string & id)
+Developer::Developer(const std::string &id, Clock_t &clock) : Job(id, clock)
 {
-    _id = id;
 }
 
 // Clock::Register data order
@@ -47,21 +46,22 @@ std::string Developer::CallSickDay(std::string date)
 
 std::string Developer::Report() const
 {
-    std::stringstream output {""};
+    std::stringstream output{""};
 
     clock.Historic(1).accept(
         [&](auto operations)
         {
-            for (auto op: operations)
+            for (auto op : operations)
             {
                 auto tp = op.get();
-                output << "------------------" << "\n";
+                output << "------------------"
+                       << "\n";
                 output << "Start Time : " << std::get<0>(tp) << "\n";
                 output << "Start Date : " << std::get<1>(tp) << "\n";
                 output << "End Time   : " << std::get<2>(tp) << "\n";
                 output << "End Date   : " << std::get<3>(tp) << "\n";
                 output << "Nature     : " << std::get<4>(tp) << "\n";
-            } 
+            }
         });
 
     return output.str();

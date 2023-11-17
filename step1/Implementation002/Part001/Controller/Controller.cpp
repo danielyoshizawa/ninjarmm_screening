@@ -2,11 +2,15 @@
 #include "Menu.h"
 #include "Item.h"
 
-#include "Job.h"
 #include "Developer.h"
 #include "Pilot.h"
 
 #include <iostream>
+
+Controller::Controller()
+{
+    // clock = std::make_unique<Clock_t>();
+}
 
 std::string Controller::getTime(const std::string &question, std::optional<std::string> error)
 {
@@ -112,7 +116,7 @@ void Controller::initializeCallbacks()
         std::cout << "Please enter the worker id : " << std::endl;
         std::cin >> id;
 
-        jobs_container.insert(std::pair(id, new Developer(id)));
+        jobs_container.insert(std::pair(id, new Developer(id, clock)));
         addJobMenu(id);
     };
     add_pilot_Callback = [&]
@@ -121,7 +125,7 @@ void Controller::initializeCallbacks()
         std::cout << "Please enter the worker id" << std::endl;
         std::cin >> id;
 
-        jobs_container.insert(std::pair(id, new Pilot(id)));
+        jobs_container.insert(std::pair(id, new Pilot(id, clock)));
         addJobMenu(id);
     };
 }

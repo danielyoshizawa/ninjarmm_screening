@@ -7,19 +7,22 @@
 #include <string>
 #include <Validator.h>
 #include <optional>
+#include "Job.h"
 
 // General purpose controller
 // Our application is very simple so there is no need to multiple controllers here
 // TODO : Implement the rule of 3 here, OR, delete all
 class Item;
 class Menu;
-class Job;
 class Controller
 {
 private:
     // TODO : think about this design choice,
     //        should the menu id be the key? is't kind messy?
     Validator validator;
+    // TODO : Evaluate the need of a pointer here in the next step
+    // std::unique_ptr<Clock_t> clock;
+    Clock_t clock;
     std::map<std::string, Job *> jobs_container;
     // TODO : Clock, use composition passing a pointer to clock to all jobs
     // Clock<...> clock or register, idk
@@ -56,6 +59,7 @@ private:
     std::string getInput(const std::string & question, std::function<bool(std::string)> && validation, std::optional<std::string> error = std::nullopt);
     void executeCommand(std::function<void(Job &)> && command);
 public:
+    Controller();
     // TODO : Create a destructor or use smart pointer
     void Build();
     void Execute(); // Only this is called we will be inside the infinity loop

@@ -1,9 +1,6 @@
 #include "Pilot.h"
 
-Pilot::Pilot(const std::string & id) 
-{    
-    _id = id;
-};
+Pilot::Pilot(const std::string &id, Clock_t &clock) : Job(id, clock){};
 
 std::string Pilot::ClockIn(std::string date, std::string time)
 {

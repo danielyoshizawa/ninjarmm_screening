@@ -9,7 +9,7 @@
 class Developer : public Job
 {
 public:
-    Developer(const std::string & id);
+    Developer(const std::string & id, Clock_t & clock);
     std::string ClockIn(std::string date, std::string time) override;
     std::string ClockOut(std::string date, std::string time) override;
     std::string ScheduleVacation(std::string begin, std::string end) override;

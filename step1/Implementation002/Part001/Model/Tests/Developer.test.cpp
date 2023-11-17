@@ -30,7 +30,8 @@
 TEST_CASE( "Developer Test Suit", "[Job][Developer]" ) {
 
     // TODO : Don't need a pointer here, stack is fine
-    auto developer = std::make_unique<Developer>("");
+    Clock_t clock;
+    auto developer = std::make_unique<Developer>("", clock);
 
     SECTION("Clock In") {
         auto response = developer->ClockIn("2023-11-06", "10:05");

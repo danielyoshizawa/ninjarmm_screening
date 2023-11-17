@@ -10,7 +10,7 @@
 class Pilot : public Job
 {
 public:
-    Pilot(const std::string & id);
+    Pilot(const std::string & id, Clock_t & clock);
     std::string ClockIn(std::string date, std::string time) override;
     std::string ClockOut(std::string date, std::string time) override;
     std::string ScheduleVacation(std::string begin, std::string end) override;

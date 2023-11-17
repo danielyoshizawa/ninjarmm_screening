@@ -56,6 +56,7 @@ class Clock
 {
 private:
     // TODO : isn't set with extra steps?
+    // TODO : Change to id type to string or change the rest
     std::map<int, Recorder<Args...>> operations;
 
 public:
