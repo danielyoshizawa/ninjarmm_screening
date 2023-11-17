@@ -83,8 +83,12 @@ void Controller::initializeCallbacks()
         std::string date = getDate("Date (yyyy-mm-dd) : ");
         executeCommand([&](Job &job)
                        {
-            job.CallSickDay(date);
-            std::cout << "Sick Day : " << date << " - succeed" << std::endl; });
+            if (job.CallSickDay(date))
+            {
+                std::cout << "Sick Day : " << date << " - registered" << std::endl;
+            } else {
+                std::cout << "Sick days exceed for " << date.substr(0,4) << std::endl;
+            } });
     };
     vacation_Callback = [&]
     {
