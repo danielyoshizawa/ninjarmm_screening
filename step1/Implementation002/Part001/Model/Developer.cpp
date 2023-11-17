@@ -22,25 +22,25 @@ std::string Developer::ClockIn(std::string date, std::string time)
     // TODO : Hardcoded Id for now, Developer == 1, Pilot == 2
     // TODO : Increasing the problem, maybe create a enum to
     //        nature. This is getting uglier
-    clock.Register(1, time, date, "", "", "clockin");
+    clock.Register(_id, time, date, "", "", "clockin");
     return "Clock In";
 }
 
 std::string Developer::ClockOut(std::string date, std::string time)
 {
-    clock.Register(1, "", "", time, date, "clockout");
+    clock.Register(_id, "", "", time, date, "clockout");
     return "Clock Out";
 }
 
 std::string Developer::ScheduleVacation(std::string begin, std::string end)
 {
-    clock.Register(1, "", begin, "", end, "vacation");
+    clock.Register(_id, "", begin, "", end, "vacation");
     return "Vactions Scheduled";
 }
 
 std::string Developer::CallSickDay(std::string date)
 {
-    clock.Register(1, "", date, "", date, "sickDay");
+    clock.Register(_id, "", date, "", date, "sickDay");
     return "Calling Sick";
 }
 
@@ -48,7 +48,7 @@ std::string Developer::Report() const
 {
     std::stringstream output{""};
 
-    clock.Historic(1).accept(
+    clock.Historic(_id).accept(
         [&](auto operations)
         {
             for (auto op : operations)

@@ -7,15 +7,15 @@
 TEST_CASE("Testing register and historic", "[Clock]")
 {
     Clock<std::string, std::string, std::string, std::string, std::string> ck;
-    ck.Register(1, "startTime0", "endTime0", "startDate0", "endDate0", "nature0");
-    ck.Register(1, "startTime1", "endTime1", "startDate1", "endDate1", "nature1");
-    ck.Register(1, "startTime2", "endTime2", "startDate2", "endDate2", "nature2");
-    ck.Register(1, "startTime3", "endTime3", "startDate3", "endDate3", "nature3");
+    ck.Register("dev1", "startTime0", "endTime0", "startDate0", "endDate0", "nature0");
+    ck.Register("dev1", "startTime1", "endTime1", "startDate1", "endDate1", "nature1");
+    ck.Register("dev1", "startTime2", "endTime2", "startDate2", "endDate2", "nature2");
+    ck.Register("dev1", "startTime3", "endTime3", "startDate3", "endDate3", "nature3");
 
-    ck.Register(2, "startTime0", "endTime0", "startDate0", "endDate0", "nature0");
-    ck.Register(2, "startTime1", "endTime1", "startDate1", "endDate1", "nature1");
-    ck.Register(2, "startTime2", "endTime2", "startDate2", "endDate2", "nature2");
-    ck.Register(2, "startTime3", "endTime3", "startDate3", "endDate3", "nature3");
+    ck.Register("pilot1", "startTime0", "endTime0", "startDate0", "endDate0", "nature0");
+    ck.Register("pilot1", "startTime1", "endTime1", "startDate1", "endDate1", "nature1");
+    ck.Register("pilot1", "startTime2", "endTime2", "startDate2", "endDate2", "nature2");
+    ck.Register("pilot1", "startTime3", "endTime3", "startDate3", "endDate3", "nature3");
 
     auto requirements =
         [](auto operations)
@@ -34,8 +34,8 @@ TEST_CASE("Testing register and historic", "[Clock]")
             }
         };
 
-    ck.Historic(1).accept(requirements);
-    ck.Historic(2).accept(requirements);
+    ck.Historic("dev1").accept(requirements);
+    ck.Historic("pilot1").accept(requirements);
 }
 
 TEST_CASE("Testing mixed types - Variadic Template", "[Clock]")
@@ -47,7 +47,7 @@ TEST_CASE("Testing mixed types - Variadic Template", "[Clock]")
     };
 
     Clock<std::string, int, test_type, float> ck;
-    ck.Register(1, "string", 10, test_type{1, "Test Type"}, 4.5f);
+    ck.Register("dev1", "string", 10, test_type{1, "Test Type"}, 4.5f);
     
     auto requirements =
         [](auto operations)
@@ -65,5 +65,5 @@ TEST_CASE("Testing mixed types - Variadic Template", "[Clock]")
             }
         };
 
-    ck.Historic(1).accept(requirements);
+    ck.Historic("dev1").accept(requirements);
 }

@@ -39,7 +39,7 @@ public:
     }
 
     template <typename V>
-    void accept(V && visitor) const
+    void accept(V &&visitor) const
     {
         visitor(operations);
     }
@@ -55,12 +55,10 @@ template <typename... Args>
 class Clock
 {
 private:
-    // TODO : isn't set with extra steps?
-    // TODO : Change to id type to string or change the rest
-    std::map<int, Recorder<Args...>> operations;
+    std::map<std::string, Recorder<Args...>> operations;
 
 public:
-    void Register(int id, Args... args)
+    void Register(const std::string &id, Args... args)
     {
         auto newRecord = Record{args...};
         // Retrive recorder
@@ -75,7 +73,7 @@ public:
         recorder->second.add(newRecord);
     }
 
-    auto Historic(int id) const -> Recorder<Args...>
+    auto Historic(const std::string &id) const -> Recorder<Args...>
     {
         return operations.at(id);
     };
