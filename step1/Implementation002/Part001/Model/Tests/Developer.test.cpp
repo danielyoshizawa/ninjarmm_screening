@@ -49,7 +49,21 @@ TEST_CASE( "Developer Test Suit", "[Job][Developer]" ) {
     }
 
     SECTION("Calling Sick") {
+        // Our current limit of sick days is 9 per year
+        REQUIRE(developer->CallSickDay("2023-11-01"));
+        REQUIRE(developer->CallSickDay("2023-11-02"));
+        REQUIRE(developer->CallSickDay("2023-11-03"));
+        REQUIRE(developer->CallSickDay("2023-11-04"));
+        REQUIRE(developer->CallSickDay("2023-11-05"));
+        REQUIRE(developer->CallSickDay("2023-11-06"));
         REQUIRE(developer->CallSickDay("2023-11-07"));
+        REQUIRE(developer->CallSickDay("2023-11-08"));
+        REQUIRE(developer->CallSickDay("2023-11-09"));
+        REQUIRE_FALSE(developer->CallSickDay("2023-11-10"));
+        // 2024 should work
+        REQUIRE(developer->CallSickDay("2024-01-01"));
+        // 2023 should still fail
+        REQUIRE_FALSE(developer->CallSickDay("2023-11-11"));
     }
 
     SECTION("Report Status") {
