@@ -8,6 +8,9 @@
 // Rule of 0, no dinamically allocated memory so far
 class Developer : public Job
 {
+private:
+    bool exceedVacationDaysLimits(const Date & begin, const Date & end) const noexcept;
+    bool validateVacationDates(const Date & begin,const Date & end) const noexcept;
 public:
     Developer(const std::string & id, Clock_t & clock);
     std::string ClockIn(Date date, Time time) override;

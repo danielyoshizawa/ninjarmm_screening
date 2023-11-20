@@ -43,51 +43,30 @@ std::string Developer::ClockOut(Date date, Time time)
     return "Clock Out";
 }
 
-// TODO : Write a function to return the number of vacations days in the register
-bool Developer::ScheduleVacation(Date begin, Date end)
+bool Developer::exceedVacationDaysLimits(const Date &begin, const Date &end) const noexcept
 {
-    // Group by year
-    // Calc range (2023-10-01 -> 2023-10-30 should return 30)
-    // If exceed 30 days fail and return remaining days (use std::variant c++20)
-    // TODO : Ignore feb 29th
-    // TODO : Keep track of each month length
-    // TODO : Think about vacations at the end of the year that passes to the next year
-    //        Maybe only work with begin, if the end is next year, cap to last day of the month
-    //        And the reminder goes to the next year.
-    // 2023-01-01 : 2023-01-09 = 10 days
-    // 2023-02-01 : 2023-02-14 = 15 days
-    // 2023-12-26 : 2024-01-16 =  6 days (won't accept)
-    // 2023-12-27 : 2024-01-15 =  5 days (2023) -> 15 days (2024)
-    // 2024-06-10 : 2024-06-19 = 10 days
-    // 2024-07-10 : 2024-06-15 =  6 days (won't accept)
-    // 2024-07-10 : 2024-06-14 =  5 days
-    // First thread input
-    // Means begin > end, invalid input
+    int days = end - begin;
+    return (days < 0 || days > 30);
+}
 
-    // TODO : All by copy for now, improvements on the next iteration
-    // TODO : Refactor it all!!!
+bool Developer::validateVacationDates(const Date &begin, const Date &end) const noexcept
+{
     if (begin.year() != end.year())
     {
+        // TODO : Figure out how to refactor this bit
         std::string prev_year_date = std::to_string(begin.year()) + "-12-31";
         std::string next_year_date = std::to_string(end.year()) + "-01-01";
         Date partial_begin{next_year_date};
         Date partial_end{prev_year_date};
 
-        int partial_days_prev = partial_end - begin;
-        if (partial_days_prev < 0 || partial_days_prev > 30)
-        {
-            return false;
-        }
-        int partial_days_next = end - partial_begin;
-        if (partial_days_next < 0 || partial_days_next > 30)
+        if (exceedVacationDaysLimits(begin, partial_end) || exceedVacationDaysLimits(partial_begin, end))
         {
             return false;
         }
     }
     else
     {
-        int days = end - begin;
-        if (days < 0 || days > 30)
+        if (exceedVacationDaysLimits(begin, end))
         {
             return false;
         }
@@ -111,7 +90,7 @@ bool Developer::ScheduleVacation(Date begin, Date end)
                 Date tmp_start{op_start_date};
                 Date tmp_end{op_end_date};
 
-                // Accumulate every year, then compare
+                // Accumulate every year
                 if (tmp_start.year() == tmp_end.year()) {
                     count_vacation_days_map[tmp_start.year()] += tmp_end - tmp_start;
                 } else {
@@ -123,7 +102,7 @@ bool Developer::ScheduleVacation(Date begin, Date end)
                     count_vacation_days_map[tmp_end.year()] += tmp_end - partial_end;
                 }
             } });
-        // If end and begin years are equal
+
         if (begin.year() == end.year())
         {
             int days = end - begin;
@@ -159,6 +138,16 @@ bool Developer::ScheduleVacation(Date begin, Date end)
     }
     catch (const std::out_of_range &ex)
     {
+    }
+
+    return true;
+}
+
+bool Developer::ScheduleVacation(Date begin, Date end)
+{
+    if (!validateVacationDates(begin, end))
+    {
+        return false;
     }
 
     clock.Register(_id, "", begin.toString(), "", end.toString(), "vacation");
