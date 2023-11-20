@@ -22,6 +22,7 @@ enable_testing()
 add_subdirectory(Lib/Clock)
 add_subdirectory(Lib/Validator)
 add_subdirectory(Lib/Time)
+add_subdirectory(Lib/Date)
 
 add_executable("${NAME}" main.cpp)
 set_property(TARGET "${NAME}" 
@@ -33,4 +34,4 @@ add_subdirectory(Model)
 add_subdirectory(Controller)
 add_subdirectory(View)
 
-target_link_libraries("${NAME}" PUBLIC Clock Validator Time)
+target_link_libraries("${NAME}" PUBLIC Clock Validator Time Date)
