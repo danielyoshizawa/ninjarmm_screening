@@ -2,6 +2,8 @@
 #define HEADER_TIME
 
 #include <string>
+#include <sstream>
+#include <iomanip>
 // Have a class to do time arithmetics
 // Receive strings, parse to int, overload -
 // This lib will only operate on hh:mm
@@ -28,12 +30,27 @@ private:
     };
 
 public:
+    ~Time() = default;
     // Once time is defined we cannot change it
     // Arithmetics will return a new object (value) of time
     Time(const std::string &time)
     {
         parseString(time);
     };
+    Time(const Time &other)
+    {
+        _hour = other._hour;
+        _minute = other._minute;
+    }
+    Time &operator=(const Time &other)
+    {
+        _hour = other._hour;
+        _minute = other._minute;
+
+        return *this;
+    }
+    Time( Time && other) = default;
+    Time &operator=(Time && other) = default;
     int hour() const noexcept
     {
         return _hour;
@@ -44,20 +61,23 @@ public:
     };
     std::string toString() const
     {
-        return std::to_string(_hour) + ":" + std::to_string(_minute);
+        std::stringstream ss;
+        ss << std::setfill('0') << std::setw(2) << std::to_string(_hour) << ":";
+        ss << std::setw(2) << std::to_string(_minute);
+        return ss.str();
     };
     friend Time operator-(const Time &l, const Time &r);
     friend std::ostream &operator<<(std::ostream &out, const Time &o);
 };
 
-Time operator-(const Time &l, const Time &r)
+inline Time operator-(const Time &l, const Time &r)
 {
     int diff_time = ((l.hour() * 60) + l.minute()) - ((r.hour() * 60) + r.minute());
 
     return Time{std::to_string(diff_time / 60) + ":" + std::to_string(diff_time % 60)};
 };
 
-std::ostream &operator<<(std::ostream &out, const Time &time)
+inline std::ostream &operator<<(std::ostream &out, const Time &time)
 {
     return out << time.toString();
 };
