@@ -64,7 +64,7 @@ void Controller::initializeCallbacks()
         std::string start_date = getDate("Start Date (yyyy-mm-dd) : ");
         executeCommand([&](Job &job)
                        {
-            job.ClockIn(start_time, start_date);
+            job.ClockIn(Date{start_date}, Time{start_time});
             std::cout << "ClockIn : " << start_time << " | " << start_date << " - succeed" << std::endl; });
     };
     clockOut_Callback = [&]
@@ -74,7 +74,7 @@ void Controller::initializeCallbacks()
         std::string end_date = getDate("End Date (yyyy-mm-dd) : ");
         executeCommand([&](Job &job)
                        {
-            job.ClockOut(end_time, end_date);
+            job.ClockOut(Date{end_date}, Time{end_time});
             std::cout << "ClockOut : " << end_time << " | " << end_date << " - succeed" << std::endl; });
     };
     sickDay_Callback = [&]
@@ -83,7 +83,7 @@ void Controller::initializeCallbacks()
         std::string date = getDate("Date (yyyy-mm-dd) : ");
         executeCommand([&](Job &job)
                        {
-            if (job.CallSickDay(date))
+            if (job.CallSickDay(Date{date}))
             {
                 std::cout << "Sick Day : " << date << " - registered" << std::endl;
             } else {
@@ -97,7 +97,9 @@ void Controller::initializeCallbacks()
         std::string end_date = getDate("End Date (yyyy-mm-dd) : ");
         executeCommand([&](Job &job)
                        {
-            job.ScheduleVacation(start_date, end_date);
+            // TODO : Date can throw
+            job.ScheduleVacation(Date{start_date}, Date{end_date});
+            // TODO : Evaluate the function return
             std::cout << "Vacations : " << start_date << " | " << end_date << " - succeed" << std::endl; });
     };
     report_Callback = [&]

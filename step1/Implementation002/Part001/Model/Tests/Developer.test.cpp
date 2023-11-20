@@ -26,6 +26,7 @@
 #include "Developer.h"
 #include <memory>
 #include <sstream>
+#include <Date.h>
 
 TEST_CASE( "Developer Test Suit", "[Job][Developer]" ) {
 
@@ -34,36 +35,57 @@ TEST_CASE( "Developer Test Suit", "[Job][Developer]" ) {
     auto developer = std::make_unique<Developer>("", clock);
 
     SECTION("Clock In") {
-        auto response = developer->ClockIn("2023-11-06", "10:05");
+        auto response = developer->ClockIn(Date{"2023-11-06"}, Time{"10:05"});
         REQUIRE(response == "Clock In");
 
     }
     SECTION("Clock Out") {
-        auto response = developer->ClockOut("2023-11-06", "18:05");
+        auto response = developer->ClockOut(Date{"2023-11-06"}, Time{"18:05"});
         REQUIRE(response == "Clock Out");
     }
 
     SECTION("Vacations") {
-        auto response = developer->ScheduleVacation("2023-12-05", "2023-01-04");
-        REQUIRE(response == "Vactions Scheduled");
+        // End date should be later than the start date
+        REQUIRE_FALSE(developer->ScheduleVacation(Date{"2024-01-01"}, Date{"2023-12-25"}));
+        // Shouldn't exceed 30 days
+        REQUIRE_FALSE(developer->ScheduleVacation(Date{"2023-01-01"}, Date{"2023-02-02"}));
+        // // Last rule shouldn't apply directly if end date is in the next year
+        REQUIRE(developer->ScheduleVacation(Date{"2020-12-15"}, Date{"2021-01-15"}));
+        // // Except if any part is more than 30 days
+        REQUIRE_FALSE(developer->ScheduleVacation(Date{"2023-11-30"}, Date{"2024-01-01"}));
+        REQUIRE_FALSE(developer->ScheduleVacation(Date{"2023-12-31"}, Date{"2024-02-01"}));
+        // 2023-01-01 : 2023-01-09 = 10 days
+        // 2023-02-01 : 2023-02-14 = 15 days
+        // 2023-12-26 : 2024-01-16 =  6 days (won't accept)
+        // 2023-12-27 : 2024-01-15 =  5 days (2023) -> 15 days (2024)
+        // 2024-06-10 : 2024-06-19 = 10 days
+        // 2024-07-10 : 2024-06-15 =  6 days (won't accept)
+        // 2024-07-10 : 2024-06-14 =  5 days
+        REQUIRE(developer->ScheduleVacation(Date{"2023-01-01"}, Date{"2023-01-09"}));
+        REQUIRE(developer->ScheduleVacation(Date{"2023-02-01"}, Date{"2023-02-14"}));
+        // REQUIRE_FALSE(developer->ScheduleVacation(Date{"2023-12-26"}, Date{"2024-01-16"}));
+        // REQUIRE(developer->ScheduleVacation("2023-12-27", "2024-01-15"));
+        // REQUIRE(developer->ScheduleVacation("2024-06-10", "2024-06-19"));
+        // REQUIRE_FALSE(developer->ScheduleVacation("2024-07-10", "2024-06-15"));
+        // REQUIRE(developer->ScheduleVacation("2024-07-10", "2024-06-14"));
     }
 
     SECTION("Calling Sick") {
         // Our current limit of sick days is 9 per year
-        REQUIRE(developer->CallSickDay("2023-11-01"));
-        REQUIRE(developer->CallSickDay("2023-11-02"));
-        REQUIRE(developer->CallSickDay("2023-11-03"));
-        REQUIRE(developer->CallSickDay("2023-11-04"));
-        REQUIRE(developer->CallSickDay("2023-11-05"));
-        REQUIRE(developer->CallSickDay("2023-11-06"));
-        REQUIRE(developer->CallSickDay("2023-11-07"));
-        REQUIRE(developer->CallSickDay("2023-11-08"));
-        REQUIRE(developer->CallSickDay("2023-11-09"));
-        REQUIRE_FALSE(developer->CallSickDay("2023-11-10"));
+        REQUIRE(developer->CallSickDay(Date{"2023-11-01"}));
+        REQUIRE(developer->CallSickDay(Date{"2023-11-02"}));
+        REQUIRE(developer->CallSickDay(Date{"2023-11-03"}));
+        REQUIRE(developer->CallSickDay(Date{"2023-11-04"}));
+        REQUIRE(developer->CallSickDay(Date{"2023-11-05"}));
+        REQUIRE(developer->CallSickDay(Date{"2023-11-06"}));
+        REQUIRE(developer->CallSickDay(Date{"2023-11-07"}));
+        REQUIRE(developer->CallSickDay(Date{"2023-11-08"}));
+        REQUIRE(developer->CallSickDay(Date{"2023-11-09"}));
+        REQUIRE_FALSE(developer->CallSickDay(Date{"2023-11-10"}));
         // 2024 should work
-        REQUIRE(developer->CallSickDay("2024-01-01"));
+        REQUIRE(developer->CallSickDay(Date{"2024-01-01"}));
         // 2023 should still fail
-        REQUIRE_FALSE(developer->CallSickDay("2023-11-11"));
+        REQUIRE_FALSE(developer->CallSickDay(Date{"2023-11-11"}));
     }
 
     SECTION("Report Status") {
@@ -75,7 +97,7 @@ TEST_CASE( "Developer Test Suit", "[Job][Developer]" ) {
         output << "End Date   : " << "\n";
         output << "Nature     : " << "clockin" << "\n";
 
-        developer->ClockIn("2023-11-06", "10:05");
+        developer->ClockIn(Date{"2023-11-06"}, Time{"10:05"});
         auto response = developer->Report();
 
         REQUIRE_THAT(response, Catch::Matchers::Equals(output.str()));

@@ -2,22 +2,22 @@
 
 Pilot::Pilot(const std::string &id, Clock_t &clock) : Job(id, clock){};
 
-std::string Pilot::ClockIn(std::string date, std::string time)
+std::string Pilot::ClockIn(Date date, Time time)
 {
     return "";
 }
 
-std::string Pilot::ClockOut(std::string date, std::string time)
+std::string Pilot::ClockOut(Date date, Time time)
 {
     return "";
 }
 
-std::string Pilot::ScheduleVacation(std::string begin, std::string end)
+bool Pilot::ScheduleVacation(Date begin, Date end)
 {
-    return "";
+    return true;
 }
 
-bool Pilot::CallSickDay(std::string date)
+bool Pilot::CallSickDay(Date date)
 {
     return true;
 }

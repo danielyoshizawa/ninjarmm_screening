@@ -6,7 +6,7 @@
 // Developer Model Rules:
 // - They need to work 8h per day (How to reinforce it?)
 // - Can have 9 sick days per year (This is easy, can check for all the entries or keep an internal state) - DONE
-// - 30 days vacations (Same as the previous one)
+// - 30 days vacations per year (Same as the previous one)
 // - Work only on weekdays (I'm not keeping a calendar, maybe I'll need to ignore this one)
 // - Report should have a resume of activity -DONE
 
@@ -20,7 +20,7 @@ Developer::Developer(const std::string &id, Clock_t &clock) : Job(id, clock)
 // Clock::Register data order
 // startTime, startDate, endTime, endDate, nature
 // TODO : Reinforce the rules defined for this class
-std::string Developer::ClockIn(std::string date, std::string time)
+std::string Developer::ClockIn(Date date, Time time)
 {
     // TODO : Maybe we have a design flaw here
     //        I'll have many empty fields for each entry
@@ -30,35 +30,108 @@ std::string Developer::ClockIn(std::string date, std::string time)
     // TODO : Hardcoded Id for now, Developer == 1, Pilot == 2
     // TODO : Increasing the problem, maybe create a enum to
     //        nature. This is getting uglier
-    clock.Register(_id, time, date, "", "", "clockin");
+    // TODO : Think about empty dates, those will throw
+    Time t = Time{"10:00"};
+    Date d = Date{"2023-10-10"};
+    clock.Register(_id, time.toString(), date.toString(), "", "", "clockin");
     return "Clock In";
 }
 
-std::string Developer::ClockOut(std::string date, std::string time)
+std::string Developer::ClockOut(Date date, Time time)
 {
-    clock.Register(_id, "", "", time, date, "clockout");
+    clock.Register(_id, "", "", time.toString(), date.toString(), "clockout");
     return "Clock Out";
 }
 
-std::string Developer::ScheduleVacation(std::string begin, std::string end)
+bool Developer::ScheduleVacation(Date begin, Date end)
 {
-    clock.Register(_id, "", begin, "", end, "vacation");
-    return "Vactions Scheduled";
+    // Group by year
+    // Calc range (2023-10-01 -> 2023-10-30 should return 30)
+    // If exceed 30 days fail and return remaining days (use std::variant c++20)
+    // TODO : Ignore feb 29th
+    // TODO : Keep track of each month length
+    // TODO : Think about vacations at the end of the year that passes to the next year
+    //        Maybe only work with begin, if the end is next year, cap to last day of the month
+    //        And the reminder goes to the next year.
+    // 2023-01-01 : 2023-01-09 = 10 days
+    // 2023-02-01 : 2023-02-14 = 15 days
+    // 2023-12-26 : 2024-01-16 =  6 days (won't accept)
+    // 2023-12-27 : 2024-01-15 =  5 days (2023) -> 15 days (2024)
+    // 2024-06-10 : 2024-06-19 = 10 days
+    // 2024-07-10 : 2024-06-15 =  6 days (won't accept)
+    // 2024-07-10 : 2024-06-14 =  5 days
+    // First thread input
+    // Means begin > end, invalid input
+
+    // TODO : All by copy for now, improvements on the next iteration
+    if (begin.year() != end.year())
+    {
+        std::string prev_year_date = std::to_string(begin.year()) + "-12-31";
+        std::string next_year_date = std::to_string(end.year()) + "-01-01";
+        Date partial_begin{next_year_date};
+        Date partial_end{prev_year_date};
+
+        int partial_days_prev = partial_end - begin;
+        if (partial_days_prev < 0 || partial_days_prev > 30)
+        {
+            return false;
+        }
+        int partial_days_next = end - partial_begin;
+        if (partial_days_next < 0 || partial_days_next > 30)
+        {
+            return false;
+        }
+    }
+    else
+    {
+        int days = end - begin;
+        if (days < 0 || days > 30)
+        {
+            return false;
+        }
+    }
+
+    // Acumulator
+    // try
+    // {
+    //     int count_vacation_days {0};
+    //     // TODO : Change it to int
+    //     int input_year = end.year();
+    //     // TODO : Compare begin and end
+    //     //        If in diff years, need to test to yyyy-12-31 and yyyy-01-01
+    //     clock.Historic(_id).accept([&](auto & operations){
+    //         for (auto & op : operations) {
+    //             if (auto dt = std::get<1>(op.get()); dt.year() == input_year)
+    //             {
+    //                 // TODO : need to operate in terms of date and time
+    //                 //        Will need to break here to refactor it all
+    //                 // count_vacation_days += ;
+    //             }
+    //         }
+    //     });
+    // }
+    // catch (const std::out_of_range &ex)
+    // {
+
+    // }
+    clock.Register(_id, "", begin.toString(), "", end.toString(), "vacation");
+    return true;
 }
 
 // TODO : Check for duplicates
-bool Developer::CallSickDay(std::string date)
+bool Developer::CallSickDay(Date date)
 {
     bool exceed_days{false};
     try
     {
         int count_sick_days{0};
-        std::string input_year = date.substr(0, 4);
+        int input_year = date.year();
         clock.Historic(_id).accept([&](auto &operations)
                                    {
             for (auto op : operations)
             {
-                if (input_year.compare(std::get<1>(op.get()).substr(0, 4)) == 0)
+                Date dt = std::get<1>(op.get());
+                if (input_year == dt.year())
                 {
                     ++count_sick_days;
                 }
@@ -76,14 +149,14 @@ bool Developer::CallSickDay(std::string date)
         return false;
     }
 
-    clock.Register(_id, "", date, "", date, "sickDay");
+    clock.Register(_id, "", date.toString(), "", date.toString(), "sickDay");
     return true;
 }
 
 std::string Developer::Report() const
 {
     std::stringstream output{""};
-
+    // TODO : try/catch - Historic can throw
     clock.Historic(_id).accept(
         [&](auto operations)
         {
