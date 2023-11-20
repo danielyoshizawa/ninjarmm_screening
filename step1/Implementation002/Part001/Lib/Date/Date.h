@@ -1,9 +1,12 @@
+#pragma once
 #ifndef HEADER_DATE
 #define HEADER_DATE
 
 #include <vector>
-#include <exception>
+#include <stdexcept>
 #include <numeric>
+#include <sstream>
+#include <iomanip>
 
 class Date
 {
@@ -49,6 +52,7 @@ private:
     }
 
 public:
+    ~Date() = default;
     Date(const std::string &date)
     {
         parseString(date);
@@ -57,6 +61,22 @@ public:
             throw std::invalid_argument("Invalid date format");
         }
     }
+    Date(const Date &other)
+    {
+        _day = other._day;
+        _month = other._month;
+        _year = other._year;
+    }
+    Date &operator=(const Date &other)
+    {
+        _day = other._day;
+        _month = other._month;
+        _year = other._year;
+
+        return *this;
+    }
+    Date( Date && other) = default;
+    Date &operator=(Date && other) = default;
     int year() const noexcept
     {
         return _year;
@@ -71,19 +91,23 @@ public:
     }
     std::string toString() const
     {
-        return std::to_string(_year) + "-" + std::to_string(_month) + "-" + std::to_string(_day);
+        std::stringstream ss;
+        ss << std::to_string(_year) << "-";
+        ss << std::setfill('0') << std::setw(2) << std::to_string(_month) << "-";
+        ss << std::setw(2) << std::to_string(_day);
+        return ss.str();
     };
 
     friend int operator-(const Date &l, const Date &r);
     friend std::ostream &operator<<(std::ostream &out, const Date &o);
 };
 
-int operator-(const Date &l, const Date &r)
+inline int operator-(const Date &l, const Date &r)
 {
     return l.inDays() - r.inDays();
 };
 
-std::ostream &operator<<(std::ostream &out, const Date &time)
+inline std::ostream &operator<<(std::ostream &out, const Date &time)
 {
     return out << time.toString();
 };

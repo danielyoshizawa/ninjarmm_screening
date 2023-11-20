@@ -32,5 +32,6 @@ TEST_CASE("Date Arithmetic library", "[Date]")
         Date date6{"2023-12-10"};
         Date date7{"2024-02-10"};
         REQUIRE((date7 - date6) == 62);
+        REQUIRE((date6 - date7) == -62);
     }
 }
