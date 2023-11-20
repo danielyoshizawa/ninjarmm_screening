@@ -43,6 +43,7 @@ std::string Developer::ClockOut(Date date, Time time)
     return "Clock Out";
 }
 
+// TODO : Write a function to return the number of vacations days in the register
 bool Developer::ScheduleVacation(Date begin, Date end)
 {
     // Group by year
@@ -64,6 +65,7 @@ bool Developer::ScheduleVacation(Date begin, Date end)
     // Means begin > end, invalid input
 
     // TODO : All by copy for now, improvements on the next iteration
+    // TODO : Refactor it all!!!
     if (begin.year() != end.year())
     {
         std::string prev_year_date = std::to_string(begin.year()) + "-12-31";
@@ -91,29 +93,74 @@ bool Developer::ScheduleVacation(Date begin, Date end)
         }
     }
 
-    // Acumulator
-    // try
-    // {
-    //     int count_vacation_days {0};
-    //     // TODO : Change it to int
-    //     int input_year = end.year();
-    //     // TODO : Compare begin and end
-    //     //        If in diff years, need to test to yyyy-12-31 and yyyy-01-01
-    //     clock.Historic(_id).accept([&](auto & operations){
-    //         for (auto & op : operations) {
-    //             if (auto dt = std::get<1>(op.get()); dt.year() == input_year)
-    //             {
-    //                 // TODO : need to operate in terms of date and time
-    //                 //        Will need to break here to refactor it all
-    //                 // count_vacation_days += ;
-    //             }
-    //         }
-    //     });
-    // }
-    // catch (const std::out_of_range &ex)
-    // {
+    // Accumulator
+    try
+    {
+        // Map to keep track of diff years
+        std::map<int, int> count_vacation_days_map;
+        clock.Historic(_id).accept([&](auto &operations)
+                                   {
+            for (auto & op : operations) {
+                // TODO : as ‘this’ argument discards qualifiers [-fpermissive]
+                // auto tp = op.get();
+                // However
+                auto tp = op.tuple; // Works
+                // op.get() is only failing in this context, need to investigate why
+                std::string op_start_date = std::get<1>(tp);
+                std::string op_end_date = std::get<3>(tp);
+                Date tmp_start{op_start_date};
+                Date tmp_end{op_end_date};
 
-    // }
+                // Accumulate every year, then compare
+                if (tmp_start.year() == tmp_end.year()) {
+                    count_vacation_days_map[tmp_start.year()] += tmp_end - tmp_start;
+                } else {
+                    std::string prev_year_date = std::to_string(tmp_start.year()) + "-12-31";
+                    std::string next_year_date = std::to_string(tmp_end.year()) + "-01-01";
+                    Date partial_begin{next_year_date};
+                    Date partial_end{prev_year_date};
+                    count_vacation_days_map[tmp_start.year()] += partial_begin - tmp_start;
+                    count_vacation_days_map[tmp_end.year()] += tmp_end - partial_end;
+                }
+            } });
+        // If end and begin years are equal
+        if (begin.year() == end.year())
+        {
+            int days = end - begin;
+            if ((count_vacation_days_map.at(begin.year()) + days) > 30)
+            {
+                return false;
+            }
+        }
+        else
+        {
+            std::string prev_year_date = std::to_string(begin.year()) + "-12-31";
+            std::string next_year_date = std::to_string(end.year()) + "-01-01";
+            Date partial_begin{next_year_date};
+            Date partial_end{prev_year_date};
+            int partial_start_days = partial_begin - begin;
+            int partial_end_days = end - partial_end;
+            try
+            {
+                if ((count_vacation_days_map.at(begin.year()) + partial_start_days) > 30)
+                {
+                    return false;
+                }
+            }
+            catch (...)
+            {
+            } // If don't find the element means we don't have vacations planned
+
+            if ((count_vacation_days_map.at(end.year()) + partial_end_days) > 30)
+            {
+                return false;
+            }
+        }
+    }
+    catch (const std::out_of_range &ex)
+    {
+    }
+
     clock.Register(_id, "", begin.toString(), "", end.toString(), "vacation");
     return true;
 }

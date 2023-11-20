@@ -54,20 +54,22 @@ TEST_CASE( "Developer Test Suit", "[Job][Developer]" ) {
         // // Except if any part is more than 30 days
         REQUIRE_FALSE(developer->ScheduleVacation(Date{"2023-11-30"}, Date{"2024-01-01"}));
         REQUIRE_FALSE(developer->ScheduleVacation(Date{"2023-12-31"}, Date{"2024-02-01"}));
-        // 2023-01-01 : 2023-01-09 = 10 days
-        // 2023-02-01 : 2023-02-14 = 15 days
-        // 2023-12-26 : 2024-01-16 =  6 days (won't accept)
+        // 2023-01-01 : 2023-01-09 =  8 days
+        // 2023-02-01 : 2023-02-16 = 15 days // 23
+        // 2023-11-26 : 2023-12-15 = 19 Days (won't accept)
+        // 2023-12-20 : 2024-01-16 = 11 days (2023) (won't accept)
         // 2023-12-27 : 2024-01-15 =  5 days (2023) -> 15 days (2024)
         // 2024-06-10 : 2024-06-19 = 10 days
         // 2024-07-10 : 2024-06-15 =  6 days (won't accept)
-        // 2024-07-10 : 2024-06-14 =  5 days
+        // 2024-06-10 : 2024-06-15 =  5 days
         REQUIRE(developer->ScheduleVacation(Date{"2023-01-01"}, Date{"2023-01-09"}));
         REQUIRE(developer->ScheduleVacation(Date{"2023-02-01"}, Date{"2023-02-14"}));
-        // REQUIRE_FALSE(developer->ScheduleVacation(Date{"2023-12-26"}, Date{"2024-01-16"}));
-        // REQUIRE(developer->ScheduleVacation("2023-12-27", "2024-01-15"));
-        // REQUIRE(developer->ScheduleVacation("2024-06-10", "2024-06-19"));
-        // REQUIRE_FALSE(developer->ScheduleVacation("2024-07-10", "2024-06-15"));
-        // REQUIRE(developer->ScheduleVacation("2024-07-10", "2024-06-14"));
+        REQUIRE_FALSE(developer->ScheduleVacation(Date{"2023-11-26"}, Date{"2023-12-15"}));
+        REQUIRE_FALSE(developer->ScheduleVacation(Date{"2023-12-20"}, Date{"2024-01-16"}));
+        REQUIRE(developer->ScheduleVacation(Date{"2023-12-27"}, Date{"2024-01-15"}));
+        REQUIRE(developer->ScheduleVacation(Date{"2024-06-10"}, Date{"2024-06-19"}));
+        REQUIRE_FALSE(developer->ScheduleVacation(Date{"2024-07-10"}, Date{"2024-06-15"}));
+        REQUIRE(developer->ScheduleVacation(Date{"2024-06-10"}, Date{"2024-06-15"}));
     }
 
     SECTION("Calling Sick") {
